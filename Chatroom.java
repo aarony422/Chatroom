@@ -31,7 +31,7 @@ public class Chatroom {
 		} else {
 			this.port = port;
 		}
-		
+
 		ServerSocket server_sock = null;
 		try {
 			server_sock = new ServerSocket(this.port);
