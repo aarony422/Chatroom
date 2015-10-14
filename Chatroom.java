@@ -33,7 +33,6 @@ public class Chatroom {
 		}
 		
 		ServerSocket server_sock = null;
-		System.out.println("port number: " + this.port);
 		try {
 			server_sock = new ServerSocket(this.port);
 			server_sock.setReuseAddress(true);
