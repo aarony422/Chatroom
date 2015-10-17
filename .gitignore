@@ -1,2 +1,4 @@
 *.class
 ChatroomTest.java
+.project
+.classpath
