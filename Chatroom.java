@@ -12,14 +12,14 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Chatroom {
-	
+
 	// current participants in Chatroom
 	// Socket maps to their name
 	HashMap<Socket, Client> participants;
-	
+
 	// port number
 	int port;
-	
+
 	// ServerSocket
 	ServerSocket server_socket;
 
@@ -44,10 +44,10 @@ public class Chatroom {
 			System.exit(1);
 		}
 		this.server_socket = server_sock;
-		
+
 		this.participants = new HashMap<Socket, Client>();
 	}
-	
+
 	// listens for client connections on port and calls handler
 	public void openChatroom() throws IOException {
 		try {
@@ -67,7 +67,7 @@ public class Chatroom {
 			this.server_socket.close();
 		}
 	}
-	
+
 	// sends greeting message and gets client name
 	// listen for message from clietn socket and broadcasts
 	// the messages
@@ -75,7 +75,7 @@ public class Chatroom {
 		// establish input and output streams
 		InputStream instream = null;
 		OutputStream outstream = null;
-		
+
 		try {
 			instream = sock.getInputStream();
 			outstream = sock.getOutputStream();
@@ -84,24 +84,24 @@ public class Chatroom {
 			sock.close();
 			return;
 		}
-		
+
 		// send greeting message, and get client name
 		sendGreetings(outstream);
-		
+
 		// listen for client name
 		String client_name;;
 		client_name = getName(instream);
 		Client c = new Client(sock, client_name);
-		
+
 		// notify chatroom about new client
 		notifyChatNewClient(client_name, sock);
-		
+
 		// add to participants
 		addParticipant(sock, c);
-		
+
 		// notify current client of all current participants
 		currentParticipants(outstream, client_name);
-		
+
 		// listen to client
 		int len = 0;
 		byte[] data = new byte[2000];
@@ -112,16 +112,14 @@ public class Chatroom {
 			content.append(s);
 			if (content.toString().contains("\n")) {
 				String message = getLine(content.toString());
-				//System.out.println(message);
 				sendToAll(message, sock);
 			}
 		}
-		
 		// remove from participants
 		removeParticipant(sock);
 		sock.close();
 	}
-	
+
 	// notifies current sock of the existing
 	public void currentParticipants(OutputStream outStream, String client_name) {
 		String names = getNames(client_name);
@@ -131,11 +129,9 @@ public class Chatroom {
 		} else {
 			message = "*****You are the only one online!*****\n";
 		}
-		
-		//System.out.println(message);
 		sendMsg(message, outStream);
 	}
-	
+
 	// gets all names of current participants
 	public synchronized String getNames(String client_name) {
 		StringBuilder rtn = new StringBuilder();
@@ -153,16 +149,15 @@ public class Chatroom {
 		}
 		return rtn.toString();
 	}
-	
+
 	// sends all participants the message, with the
 	// client_name: message format
 	public synchronized void sendToAll (String message, Socket sock) {
 		String client_name = this.participants.get(sock).Name;
-		//System.out.println("client name is : " + client_name);
 		message = client_name + ": " + message + "\n";
 		broadcastMsg(message, sock);
 	}
-	
+
 	// removes the participant on socket sock
 	// broadcasts the message that client has left the Chatroom
 	public synchronized void removeParticipant(Socket sock) {
@@ -171,7 +166,7 @@ public class Chatroom {
 		String message = "*****" + client + " has left the Chatroom!*****\n";
 		broadcastMsg(message, sock);
 	}
-	
+
 	// Sends message to all current participants
 	// calls sendMsg
 	public synchronized void broadcastMsg (String message, Socket sock) {
@@ -189,35 +184,35 @@ public class Chatroom {
 			}
 		}
 	}
-	
+
 	// method that notifies all current participants that client has joined Chatroom
 	// method calls broadcastMsg method
 	public synchronized void notifyChatNewClient(String name, Socket sock) throws IOException {
 		if (isChatroomEmpty()) {
 			return;
 		}
-		String message = "*****" + name + " has joined the Chatroom!*****\n";		
+		String message = "*****" + name + " has joined the Chatroom!*****\n";
 		broadcastMsg(message, sock);
 	}
-	
+
 	// client with socket sock is added to participants
 	public synchronized void addParticipant(Socket sock, Client c) {
 		this.participants.put(sock, c);
 	}
-	
+
 	// Returns the next line with the newline character removed
 	public String getLine(String line) {
 		String[] rtn = line.split("\n");
 		return rtn[0].substring(0, rtn[0].length() - 1);
 	}
-	
+
 	// sends the greetings message to outstream
 	// calls sendMsg
 	public void sendGreetings(OutputStream outstream) {
 		String greetings = "*****Welcome to the Chatroom!*****\nPlease enter your name: ";
 		sendMsg(greetings, outstream);
 	}
-	
+
 	// Gets the first line the client inputs
 	// Assumes it to be the user's name
 	public String getName(InputStream instream) throws IOException{
@@ -236,18 +231,18 @@ public class Chatroom {
 		} catch (NullPointerException e) {
 			System.err.println("Error User left without entering name!");
 		}
-		
+
 		String rtn[] = null;
-		
+
 		try {
 			rtn = content.toString().split("\n");
 		} catch (NullPointerException e) {
 			System.err.println("Error: User left without entering name!");
-			
+
 		}
 		return rtn[0].substring(0, rtn[0].length()-1);
 	}
-	
+
 	// sends message to a particular outstream
 	public void sendMsg (String message, OutputStream outstream) {
 		try {
@@ -259,19 +254,18 @@ public class Chatroom {
 			return;
 		}
 	}
-	
+
 	// returns true if chatroom is empty
 	public boolean isChatroomEmpty() {
 		return this.participants.isEmpty();
 	}
-
 
 	public static void main(String[] args) throws IOException {
 		if (args.length > 1) {
 			System.err.println("Usage: Chatroom <optional port>");
 			System.exit(-1);
 		}
-		
+
 		Chatroom myChatroom;
 		int port = -1;
 
@@ -285,25 +279,25 @@ public class Chatroom {
 			}
 			myChatroom = new Chatroom(port);
 		}
-		
+
 		// no port number specified
 		myChatroom = new Chatroom(port);
-		
+
 		// open myChatroom
 		myChatroom.openChatroom();
 	}
-	
+
 	// object to store client name and socket information
 	public class Client {
 		Socket socket;
 		String Name;
-		
+
 		public Client(Socket socket, String name) {
 			this.socket = socket;
 			this.Name = name;
 		}
 	}
-	
+
 	// runnable object that will handle multithreaded processes
 	public class chatHandler implements Runnable {
 		Socket socket;
@@ -322,9 +316,6 @@ public class Chatroom {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 	}
-	
-
 }
