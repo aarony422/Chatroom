@@ -1,4 +1,4 @@
-CSCI 342 Fall 2015
+Oberlin College, CSCI 342 Fall 2015
 
 Chatroom.java is a server program that manages a chatroom. It operates as follows:
 
